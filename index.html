@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>かんたんカレンダー</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a7dfc">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="header">
+    <button id="prevMonth" class="icon-btn" aria-label="前の月">‹</button>
+    <h1 id="monthLabel"></h1>
+    <button id="nextMonth" class="icon-btn" aria-label="次の月">›</button>
+    <button id="themeToggle" class="icon-btn" type="button"></button>
+  </header>
+
+  <div class="schedule-list-buttons">
+    <button id="openScheduleList" class="schedule-list-btn">📋 予定一覧</button>
+    <button id="openTaskArchive" class="schedule-list-btn">✅ タスク</button>
+    <button id="openDiaryList" class="schedule-list-btn">📝 メモ一覧</button>
+  </div>
+
+  <div class="mark-mode-row">
+    <button type="button" class="mode-btn off-btn" data-mode="off">OFF</button>
+    <button type="button" class="mode-btn" data-mode="holiday">休</button>
+    <button type="button" class="mode-btn" data-mode="national">祝</button>
+    <button type="button" class="mode-btn" data-mode="star">⭐</button>
+    <button type="button" class="mode-btn" data-mode="heart">💗</button>
+    <button type="button" class="mode-btn" data-mode="circle"><span class="mark-symbol" style="color:#2e9e4f">○</span></button>
+    <button type="button" class="mode-btn" data-mode="triangle"><span class="mark-symbol" style="color:#d99a1b">△</span></button>
+    <button type="button" class="mode-btn" data-mode="cross"><span class="mark-symbol" style="color:#d94d4d">×</span></button>
+    <button type="button" id="deleteModeBtn" class="mode-btn delete-mode-btn" data-mode="delete" aria-label="削除モード">🗑</button>
+  </div>
+
+  <div class="link-buttons compact">
+    <button id="openHabit">習慣</button>
+    <button id="openMonthMemo">メモ帳</button>
+    <button id="openExport">書出</button>
+    <button id="openHelp">?</button>
+  </div>
+
+  <p id="modeHint" class="mode-hint hidden"><span id="modeHintLabel"></span></p>
+
+  <div id="deleteActionBar" class="delete-action-bar hidden">
+    <span id="deleteSelectionCount">0件選択中</span>
+    <button id="deleteSelectedBtn" type="button">選択した日を削除</button>
+    <button id="cancelDeleteSelectionBtn" type="button">選択解除</button>
+  </div>
+
+  <div class="weekdays">
+    <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+  </div>
+
+  <div id="calendarGrid" class="calendar-grid"></div>
+</div>
+
+<div id="overlay" class="overlay hidden"></div>
+<div id="panel" class="panel hidden">
+  <div class="panel-header">
+    <h2 id="panelDate"></h2>
+    <button id="closePanel">×</button>
+  </div>
+
+  <label class="holiday-toggle">
+    <input type="checkbox" id="holidayCheck">
+    休みの日にする
+  </label>
+
+  <label class="holiday-toggle">
+    <input type="checkbox" id="nationalCheck">
+    祝日にする（日付を赤字に）
+  </label>
+
+  <div id="markChecks" class="mark-checks"></div>
+
+  <section class="section">
+    <h3>予定</h3>
+    <div class="task-input-row">
+      <input type="text" id="scheduleInput" placeholder="新しい予定を入力">
+      <button id="addSchedule">追加</button>
+    </div>
+    <ul id="scheduleList" class="task-list"></ul>
+  </section>
+
+  <section class="section">
+    <h3>タスク</h3>
+    <div class="task-input-row">
+      <input type="text" id="taskInput" placeholder="新しいタスクを入力">
+      <button id="addTask">追加</button>
+    </div>
+    <ul id="taskList" class="task-list"></ul>
+  </section>
+
+  <section class="section">
+    <h3>メモ</h3>
+    <textarea id="diaryText" rows="5" placeholder="今日のこと、メモ、日記"></textarea>
+    <button id="saveDiary">メモを保存</button>
+  </section>
+</div>
+
+<div id="archiveOverlay" class="overlay hidden"></div>
+<div id="archivePanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>タスク一覧</h2>
+    <button id="closeArchivePanel">×</button>
+  </div>
+  <ul id="archiveList" class="task-list"></ul>
+</div>
+
+<div id="scheduleListOverlay" class="overlay hidden"></div>
+<div id="scheduleListPanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>予定一覧</h2>
+    <button id="closeScheduleListPanel">×</button>
+  </div>
+  <input type="text" id="scheduleSearchInput" class="schedule-search-input" placeholder="予定をキーワードで探す">
+  <ul id="scheduleListAll" class="task-list"></ul>
+</div>
+
+
+<div id="diaryOverlay" class="overlay hidden"></div>
+<div id="diaryPanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>メモ一覧</h2>
+    <button id="closeDiaryPanel">×</button>
+  </div>
+  <ul id="diaryListEl" class="diary-list"></ul>
+</div>
+
+<div id="monthMemoOverlay" class="overlay hidden"></div>
+<div id="monthMemoPanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>メモ帳</h2>
+    <button id="closeMonthMemoPanel">×</button>
+  </div>
+  <p class="export-hint">日付や月にしばられず、思いついたことを自由に書けるメモ帳です。長期的にやりたいことのメモ書きなどにもどうぞ。</p>
+  <textarea id="monthMemoText" rows="10" placeholder="とりあえずメモ、思いついたことを自由に書けます"></textarea>
+  <div class="export-buttons">
+    <button id="copyMonthMemoBtn">コピーする</button>
+    <button id="clearMonthMemoBtn">全部消す</button>
+  </div>
+</div>
+
+<div id="habitOverlay" class="overlay hidden"></div>
+<div id="habitPanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>習慣</h2>
+    <button id="closeHabitPanel">×</button>
+  </div>
+
+  <div class="habit-month-nav">
+    <button id="habitPrevMonth" class="icon-btn" aria-label="前の月">‹</button>
+    <span id="habitMonthLabel" class="habit-month-label"></span>
+    <button id="habitNextMonth" class="icon-btn" aria-label="次の月">›</button>
+  </div>
+
+  <div id="habitProgressWrap" class="habit-progress-wrap">
+    <div class="habit-progress-bar"><div id="habitProgressFill" class="habit-progress-fill"></div></div>
+    <p id="habitProgressText" class="habit-progress-text"></p>
+  </div>
+  <p id="habitCelebration" class="habit-celebration hidden">🎉 今日の習慣、全部できました!</p>
+
+  <p class="export-hint">マスをタップしてチェックします。過去の日も、忘れていたらあとからつけられます。</p>
+  <div class="habit-grid-wrap">
+    <table id="habitGrid" class="habit-grid"></table>
+  </div>
+
+  <div class="task-input-row">
+    <input type="text" id="habitNameInput" placeholder="新しい習慣を追加(例: 早起き・運動・読書)">
+    <button id="addHabitBtn">追加</button>
+  </div>
+</div>
+
+<div id="exportOverlay" class="overlay hidden"></div>
+<div id="exportPanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>記録の書き出し(CSV)</h2>
+    <button id="closeExportPanel">×</button>
+  </div>
+  <p class="export-hint">書き出す項目を選べます(不要な項目は外せます)。全部まとめてよりも、必要な項目だけに絞って書き出すほうが、あとで見返したときに分かりやすくなります。</p>
+  <div class="export-item-checks">
+    <label><input type="checkbox" id="exportCheckSchedule" checked> 予定</label>
+    <label><input type="checkbox" id="exportCheckMemo" checked> メモ</label>
+    <label><input type="checkbox" id="exportCheckTask" checked> タスク</label>
+  </div>
+  <p class="export-hint">CSV形式のデータなので、コピーしてスプレッドシートに貼り付ければ表形式で保存できます。</p>
+  <textarea id="exportText" rows="10" readonly></textarea>
+  <div class="export-buttons">
+    <button id="copyExportBtn">コピーする</button>
+    <button id="downloadExportBtn">ファイルとして保存</button>
+  </div>
+
+  <details class="category-editor-wrap">
+    <summary>期間を指定してまとめて削除する</summary>
+    <div class="bulk-delete-row">
+      <input type="date" id="bulkDeleteFrom">
+      <span>〜</span>
+      <input type="date" id="bulkDeleteTo">
+      <button id="bulkDeleteBtn">削除する</button>
+    </div>
+    <p class="export-hint">指定した期間(両端を含む)の予定・メモ・完了済みタスクが、まとめて削除されます。元に戻せないので、先に上のコピー・ファイル保存で控えを残してから行うと安心です。</p>
+  </details>
+
+  <details class="category-editor-wrap">
+    <summary>すべてのデータを削除して初期状態に戻す</summary>
+    <p class="export-hint">休み・祝日・マーク・予定・タスク・メモ・メモ帳など、このアプリに保存されているデータを全部消して、初めて使ったときの状態に戻します。元に戻せません。</p>
+    <button id="resetAllBtn" class="reset-all-btn" type="button">すべてのデータを削除する</button>
+  </details>
+</div>
+
+<div id="helpOverlay" class="overlay hidden"></div>
+<div id="helpPanel" class="panel hidden">
+  <div class="panel-header">
+    <h2>このアプリについて</h2>
+    <button id="closeHelpPanel">×</button>
+  </div>
+
+  <div class="help-content">
+    <h3>どんなアプリ?</h3>
+    <p>紙の手帳のような感覚で使える、無料のシンプルなカレンダーです。会員登録や広告はありません。日付をタップして、印つけ・予定・タスク・メモを書き込むだけで使えます。</p>
+
+    <h3>使い方</h3>
+    <ul>
+      <li><strong>予定・タスク・メモ</strong>：日付をタップすると入力画面が開きます。書いて閉じれば保存されます</li>
+      <li><strong>印つけ</strong>：上部の印ボタン(休・祝・⭐など)を選んでから日付をタップ。もう一度タップすると外れます</li>
+      <li><strong>予定を探す</strong>：「予定一覧」ボタンから、過去・未来の予定をまとめて見たり、キーワード検索したりできます</li>
+    </ul>
+    <p>祝日・祭日は自動では表示されず、手動で「祝」マークをつける仕様です。外部のAPIと通信すれば自動化も可能ですが、通信を一切行わない設計にすることで、「データがどこにも送信されない」という分かりやすさ・安心感を優先しています。</p>
+
+    <h3>データの保存について</h3>
+    <p>入力内容は<strong>この端末のブラウザの中</strong>だけに保存され、外部には送信されません。ただし別のブラウザや別の端末とはデータが共有されず、ブラウザの履歴消去で内容も消えてしまいます。大事な記録は「書出」ボタンからコピーして、メモアプリなどに控えておくと安心です。</p>
+
+    <h3>ネットがない場所でも使える?</h3>
+    <p>一度ネットに繋がった状態で開いておけば、以後はオフラインでも表示・入力できます(アプリを更新した直後だけは、一度ネットに繋げて開いてください)。</p>
+
+    <h3>毎回開きやすくするには</h3>
+    <p>次のどちらかをしておくと、毎回URLを入力しなくてもすぐに開けるようになります。</p>
+
+    <p><strong>方法1: アイコンとしてホーム画面に追加する</strong>(他のアプリと同じようにタップするだけで開けます)</p>
+    <p>iPhone(Safari)の場合</p>
+    <ul>
+      <li>画面下(または上)にある、四角から矢印が出ているマークの「共有」ボタンをタップ</li>
+      <li>出てきたメニューを下にスクロールして「ホーム画面に追加」をタップ</li>
+      <li>右上の「追加」をタップすると完了です</li>
+    </ul>
+    <p>Android(Chromeなど)の場合</p>
+    <ul>
+      <li>画面右上にある、点が縦に3つ並んだマーク(メニュー)をタップ</li>
+      <li>「ホーム画面に追加」または「アプリをインストール」をタップ</li>
+      <li>確認画面が出たら「追加」または「インストール」をタップすると完了です</li>
+    </ul>
+
+    <p><strong>方法2: ブラウザの「お気に入り」に登録する</strong>(ブラウザを開いて一覧から選ぶだけで表示できます)</p>
+    <ul>
+      <li>画面上の☆マーク、または共有ボタンの中にある「お気に入りに追加」「ブックマーク」をタップ</li>
+      <li>ブラウザのメニューから、登録した「お気に入り」を開けばアプリが表示されます</li>
+    </ul>
+
+    <p class="disclaimer">※本アプリのご利用は自己責任でお願いいたします。個人が趣味で開発している無料アプリのため、動作の保証やサポートはいたしかねます。</p>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
