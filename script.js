@@ -126,7 +126,6 @@ const addHabitBtn = document.getElementById("addHabitBtn");
 const habitProgressWrap = document.getElementById("habitProgressWrap");
 const habitProgressFill = document.getElementById("habitProgressFill");
 const habitProgressText = document.getElementById("habitProgressText");
-const habitCelebration = document.getElementById("habitCelebration");
 
 let habitViewYear;
 let habitViewMonth; // 0-11
@@ -197,7 +196,6 @@ function renderHabitPanel() {
   if (list.length === 0) {
     habitGrid.innerHTML = "";
     habitProgressWrap.classList.add("hidden");
-    habitCelebration.classList.add("hidden");
     return;
   }
   habitProgressWrap.classList.remove("hidden");
@@ -231,11 +229,9 @@ function renderHabitPanel() {
     const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
     habitProgressFill.style.width = `${pct}%`;
     habitProgressText.textContent = `今日: ${doneCount} / ${total} 達成`;
-    habitCelebration.classList.toggle("hidden", !(total > 0 && doneCount === total));
   } else {
     habitProgressFill.style.width = "0%";
     habitProgressText.textContent = "";
-    habitCelebration.classList.add("hidden");
   }
 }
 

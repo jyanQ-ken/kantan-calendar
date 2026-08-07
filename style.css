@@ -1026,22 +1026,6 @@ body.panel-open {
   text-align: right;
 }
 
-.habit-celebration {
-  margin: 10px 0;
-  padding: 10px;
-  text-align: center;
-  font-weight: bold;
-  color: #1f7a3d;
-  background: linear-gradient(90deg, rgba(46, 158, 79, 0.18), rgba(111, 208, 140, 0.1));
-  border-radius: 10px;
-  animation: habit-celebration-in 0.4s ease;
-}
-
-@keyframes habit-celebration-in {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
 .habit-grid-wrap {
   overflow-x: auto;
   margin-bottom: 14px;
