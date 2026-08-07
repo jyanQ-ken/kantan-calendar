@@ -600,7 +600,10 @@ function setActiveMode(mode) {
 
 modeButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    setActiveMode(btn.dataset.mode);
+    const clickedMode = btn.dataset.mode;
+    // 選択中の印ボタンをもう一度押したら、OFFに戻す
+    const isAlreadyActive = clickedMode !== "off" && activeMode === clickedMode;
+    setActiveMode(isAlreadyActive ? "off" : clickedMode);
     closeMenuPanel();
   });
 });
